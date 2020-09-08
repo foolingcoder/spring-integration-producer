@@ -3,6 +3,7 @@ package mu.integration.producer;
 import java.io.File;
 
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.Queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,11 +80,16 @@ public class ProducerConfig {
                 .transform("@lineProcessor.process(payload)")
 
                 .handle(Amqp.outboundAdapter(amqpTemplate)
-                        .routingKey("foo"))
+                        .routingKey("myQueue")
+                )
                 .get();
 
     }
 
+    @Bean
+    public Queue queue() {
+        return new Queue("myQueue", false);
+    }
 
     @Bean
     public MessageChannel amqpOutboundChannel() {
