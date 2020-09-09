@@ -5,16 +5,17 @@ import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
 /**
+ * Builds a corresponding {@link Message} for each csv line
  *
- * @author priteela
+ * @author Priteela
  */
 @Component
-public class LineProcessor {
+public class CsvLineMessageBuilder {
 
-    public Message process(String csvLine) throws Exception {
+    public Message build(String csvLine) throws Exception {
 
-        System.out.println(csvLine);
         Message msg = MessageBuilder.withPayload(csvLine).build();
+
         return msg;
 
     }

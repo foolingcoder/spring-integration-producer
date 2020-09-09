@@ -1,9 +1,12 @@
-package mu.integration.producer;
+package mu.integration.producer.config;
 
 import java.io.File;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +33,9 @@ public class ProducerConfig {
     public static final String LINE_DELIMETER = "\n";
     public static final String RETURN_DELIMITER = "\r";
     public static final String EMPTY = "";
+
+    @Autowired
+    private ConnectionFactory connectionFactory;
 
     @Autowired
     private AmqpTemplate amqpTemplate;
@@ -76,19 +82,54 @@ public class ProducerConfig {
                 // cleanup lines from trailing returns
                 .transform((String s) -> s.replace(LINE_DELIMETER, EMPTY).replace(RETURN_DELIMITER, EMPTY))
 
-                // convert csv string to pojo json string
-                .transform("@lineProcessor.process(payload)")
+                // convert a csv line to a payload
+                //.transform("@csvLineMessageBuilder.build(payload)")
 
-                .handle(Amqp.outboundAdapter(amqpTemplate)
-                        .routingKey("myQueue")
-                )
+                //  sends it to RabbitMq and waits for the reply
+                .handle(Amqp.outboundGateway(rabbitTemplateWithFixedReplyQueue()))
+
+                //Reads the response from Rabbitmq
+                .handle("replyMessageProcessor", "process")
+
                 .get();
 
     }
 
+    /**
+     * @return the preconfigured rabbitTemplate
+     */
+    @Bean
+    public RabbitTemplate rabbitTemplateWithFixedReplyQueue() {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+        rabbitTemplate.setRoutingKey(queue().getName());
+        rabbitTemplate.setReplyAddress(replyQueue().getName());
+        return rabbitTemplate;
+
+    }
+
+
+    /**
+     * @return the reply listener container - the rabbit template is the listener.
+     */
+    @Bean
+    public SimpleMessageListenerContainer replyListenerContainer() {
+        SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+        container.setConnectionFactory(connectionFactory);
+        container.setQueues(replyQueue());
+        container.setMessageListener(rabbitTemplateWithFixedReplyQueue());
+        return container;
+    }
+
+
     @Bean
     public Queue queue() {
         return new Queue("myQueue", false);
+    }
+
+
+    @Bean
+    public Queue replyQueue() {
+        return new Queue("replyQueue", false);
     }
 
     @Bean
