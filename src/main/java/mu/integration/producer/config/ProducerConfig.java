@@ -22,7 +22,6 @@ import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.Pollers;
 import org.springframework.integration.file.FileReadingMessageSource;
-import org.springframework.integration.file.FileWritingMessageHandler;
 import org.springframework.integration.file.dsl.Files;
 import org.springframework.integration.file.support.FileExistsMode;
 import org.springframework.integration.file.transformer.FileToStringTransformer;
@@ -87,9 +86,10 @@ public class ProducerConfig {
                 // cleanup lines from trailing returns
                 .transform((String s) -> s.replace(LINE_DELIMETER, EMPTY).replace(RETURN_DELIMITER, EMPTY))
 
-                // .handle("@csvLineService.saveCsv(payload)")
-//                //write to file
-//                .channel("process.input")
+                // saves the csv lines
+                //  .channel("process.input")
+
+                // .handle(m -> System.out.println(m))
 
                 //  sends it to RabbitMq and waits for the reply
                 .handle(Amqp.outboundGateway(rabbitTemplateWithFixedReplyQueue()))
@@ -104,24 +104,24 @@ public class ProducerConfig {
                         .collect(Collectors.joining(System.lineSeparator())))
 
                 //write to csv file
-                .channel("lines.input")
+                .channel("csvFileWriter.input")
 
                 .get();
 
     }
 
     @Bean
-    public IntegrationFlow lines(FileWritingMessageHandler fileOut) {
-        return f -> f.handle(fileOut);
+    public IntegrationFlow process() {
+        return f -> f.handle("lineMessageProcessor", "process");
     }
 
     @Bean
-    public FileWritingMessageHandler fileOut() {
-        return Files.outboundAdapter(new File("D:/test/output"))
+    public IntegrationFlow csvFileWriter() {
+        return f -> f.handle(Files.outboundAdapter(new File("D:/test/output"))
                 .appendNewLine(true)
                 .fileExistsMode(FileExistsMode.APPEND)
                 .fileNameGenerator(message -> "result.csv")
-                .get();
+                .get());
     }
 
 
