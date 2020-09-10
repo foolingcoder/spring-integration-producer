@@ -1,5 +1,7 @@
 package mu.integration.producer.service;
 
+import mu.integration.producer.entity.CsvLine;
+
 /**
  * Exposes service operations related to csv line
  *
@@ -7,6 +9,6 @@ package mu.integration.producer.service;
  */
 public interface CsvLineService {
 
-    String saveCsv(String payload);
+    void saveCsvLine(CsvLine csvLine);
 
 }

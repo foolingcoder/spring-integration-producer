@@ -1,17 +1,13 @@
 package mu.integration.producer.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 /**
  *
  * @author priteela
  */
-
-
-@Getter
-@Setter
-public class CsvLineDto {
+@Data
+public class CsvLineStatusDto {
 
     private String status = "";
     private String correlationId = "";

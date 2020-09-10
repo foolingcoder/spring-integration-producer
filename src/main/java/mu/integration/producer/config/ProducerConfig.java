@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -40,9 +39,6 @@ public class ProducerConfig {
 
     @Autowired
     private ConnectionFactory connectionFactory;
-
-    @Autowired
-    private AmqpTemplate amqpTemplate;
 
     @Bean
     public MessageSource<File> CsvFileSource() {
@@ -87,9 +83,7 @@ public class ProducerConfig {
                 .transform((String s) -> s.replace(LINE_DELIMETER, EMPTY).replace(RETURN_DELIMITER, EMPTY))
 
                 // saves the csv lines
-                //  .channel("process.input")
-
-                .handle("lineMessageProcessor", "process")
+                .handle("lineMessageHandler", "process")
 
                 // .handle(m -> System.out.println(m))
 
@@ -97,12 +91,12 @@ public class ProducerConfig {
                 .handle(Amqp.outboundGateway(rabbitTemplateWithFixedReplyQueue()))
 
                 //Reads the response from Rabbitmq
-                .handle("replyMessageProcessor", "process")
+                .handle("replyMessageHandler", "process")
 
                 .aggregate()
 
                 //convert to csv lines
-                .transform((List<String> csvLineDtos) -> csvLineDtos.stream()
+                .transform((List<String> csvLineStatusDtos) -> csvLineStatusDtos.stream()
                         .collect(Collectors.joining(System.lineSeparator())))
 
                 //write to csv file
@@ -110,11 +104,6 @@ public class ProducerConfig {
 
                 .get();
 
-    }
-
-    @Bean
-    public IntegrationFlow process() {
-        return f -> f.handle("lineMessageProcessor", "process");
     }
 
     @Bean
