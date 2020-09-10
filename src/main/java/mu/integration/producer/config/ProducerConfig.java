@@ -1,6 +1,8 @@
 package mu.integration.producer.config;
 
 import java.io.File;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Queue;
@@ -20,6 +22,9 @@ import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.Pollers;
 import org.springframework.integration.file.FileReadingMessageSource;
+import org.springframework.integration.file.FileWritingMessageHandler;
+import org.springframework.integration.file.dsl.Files;
+import org.springframework.integration.file.support.FileExistsMode;
 import org.springframework.integration.file.transformer.FileToStringTransformer;
 import org.springframework.messaging.MessageChannel;
 
@@ -82,8 +87,9 @@ public class ProducerConfig {
                 // cleanup lines from trailing returns
                 .transform((String s) -> s.replace(LINE_DELIMETER, EMPTY).replace(RETURN_DELIMITER, EMPTY))
 
-                // convert a csv line to a payload
-                //.transform("@csvLineMessageBuilder.build(payload)")
+                // .handle("@csvLineService.saveCsv(payload)")
+//                //write to file
+//                .channel("process.input")
 
                 //  sends it to RabbitMq and waits for the reply
                 .handle(Amqp.outboundGateway(rabbitTemplateWithFixedReplyQueue()))
@@ -91,9 +97,33 @@ public class ProducerConfig {
                 //Reads the response from Rabbitmq
                 .handle("replyMessageProcessor", "process")
 
+                .aggregate()
+
+                //convert to csv lines
+                .transform((List<String> csvLineDtos) -> csvLineDtos.stream()
+                        .collect(Collectors.joining(System.lineSeparator())))
+
+                //write to csv file
+                .channel("lines.input")
+
                 .get();
 
     }
+
+    @Bean
+    public IntegrationFlow lines(FileWritingMessageHandler fileOut) {
+        return f -> f.handle(fileOut);
+    }
+
+    @Bean
+    public FileWritingMessageHandler fileOut() {
+        return Files.outboundAdapter(new File("D:/test/output"))
+                .appendNewLine(true)
+                .fileExistsMode(FileExistsMode.APPEND)
+                .fileNameGenerator(message -> "result.csv")
+                .get();
+    }
+
 
     /**
      * @return the preconfigured rabbitTemplate

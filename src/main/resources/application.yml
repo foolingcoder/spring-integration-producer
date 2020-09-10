@@ -1,2 +1,13 @@
-rabbitmq:
-  queue: foo
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27018
+      database: system-config
+      username: system-config
+      password: config_123
+
+server:
+  port: 8184
+  error:
+    include-message: always
