@@ -13,9 +13,9 @@ public class LineMessageProcessor {
 
     @ServiceActivator
     public Message<String> process(Message<String> message) {
-        System.out.println("Inside process(Message message)");
+        System.out.println("\n\n ****** Inside LineMessageProcessor.process(Message message) *****");
 
-        System.out.println("Reply: " + message);
+        System.out.println("Message to send: " + message);
 
         return message;
     }

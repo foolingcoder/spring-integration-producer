@@ -89,6 +89,8 @@ public class ProducerConfig {
                 // saves the csv lines
                 //  .channel("process.input")
 
+                .handle("lineMessageProcessor", "process")
+
                 // .handle(m -> System.out.println(m))
 
                 //  sends it to RabbitMq and waits for the reply
