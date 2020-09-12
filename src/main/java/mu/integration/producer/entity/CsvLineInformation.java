@@ -22,4 +22,8 @@ public class CsvLineInformation implements Serializable {
 
     private String status;
 
+    @Override
+    public String toString() {
+        return this.id + "," + this.line + "," + this.status + "," + this.fileName;
+    }
 }

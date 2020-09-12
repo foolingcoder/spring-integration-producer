@@ -27,7 +27,7 @@ public class CsvLineController {
     @PostMapping("csvLines")
     public CsvLineInformation process(@RequestBody CsvLineInformation order) throws JsonProcessingException {
         log.info("Order saved: {}", mapper.writeValueAsString(order));
-        sender.send(order);
+        // sender.send(order);
         return order;
     }
 

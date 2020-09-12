@@ -16,7 +16,7 @@ public interface CsvLineService {
 
     CsvLineInformation saveCsvLine(Message<String> message);
 
-    CsvLineInformation updateCsvLine(Message<String> message) throws JsonProcessingException;
+    Message updateCsvLine(Message<String> message) throws JsonProcessingException;
 
     CsvLineInformation findById(Long id);
 }

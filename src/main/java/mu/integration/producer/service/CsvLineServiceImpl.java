@@ -1,6 +1,7 @@
 package mu.integration.producer.service;
 
 import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +36,7 @@ public class CsvLineServiceImpl implements CsvLineService {
     }
 
     @Override
-    public CsvLineInformation updateCsvLine(Message<String> message) throws JsonProcessingException {
+    public Message updateCsvLine(Message<String> message) throws JsonProcessingException {
 
         CsvLineInformation csvLineInformation = mapper.readValue(message.getPayload(), CsvLineInformation.class);
 
@@ -50,7 +51,9 @@ public class CsvLineServiceImpl implements CsvLineService {
                 }
 
         );
-        return csvLineInformation;
+        Message message2 = MessageBuilder.withPayload(csvLineInformation)
+                .copyHeaders(message.getHeaders()).build();
+        return message2;
     }
 
     @Override

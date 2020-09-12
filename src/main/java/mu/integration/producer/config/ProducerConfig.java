@@ -17,7 +17,6 @@ import org.springframework.integration.file.transformer.FileToStringTransformer;
 @Configuration
 public class ProducerConfig {
     public static final String INPUT_DIR = "D:\\test";
-    public static final String OUTPUT_DIR = "D:\\test\\output";
     public static final String FILE_EXTENSION = ".csv";
     public static final String LINE_DELIMITER = "\n";
     public static final String RETURN_DELIMITER = "\r";
@@ -72,11 +71,9 @@ public class ProducerConfig {
                 // saves the csv lines
                 .handle("csvLineServiceImpl", "saveCsvLine")
 
-                //  sends it to RabbitMq
+                //  sends it to RabbitMq message broker
                 .handle("csvLineInformationSender", "send")
 
-//                .aggregate()
-//
 //                .handle(m -> System.out.println(m))
 
                 .get();
