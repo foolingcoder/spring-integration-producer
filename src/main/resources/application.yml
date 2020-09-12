@@ -7,7 +7,20 @@ spring:
       username: system-config
       password: config_123
 
+  cloud:
+    stream:
+      bindings:
+        output:
+          destination: orders-out
+        input:
+          destination: orders-in
+      rabbit:
+        bindings:
+          input:
+            consumer:
+              exchangeType: direct
 server:
   port: 8184
   error:
     include-message: always
+

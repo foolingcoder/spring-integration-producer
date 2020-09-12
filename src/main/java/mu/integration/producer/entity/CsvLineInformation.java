@@ -1,6 +1,6 @@
 package mu.integration.producer.entity;
 
-import java.util.UUID;
+import java.io.Serializable;
 
 import org.springframework.data.annotation.Id;
 
@@ -11,7 +11,7 @@ import lombok.Data;
  * @author priteela
  */
 @Data
-public class CsvLine {
+public class CsvLineInformation implements Serializable {
 
     @Id
     private String id;
@@ -22,5 +22,4 @@ public class CsvLine {
 
     private String status;
 
-    private UUID correlationId;
 }

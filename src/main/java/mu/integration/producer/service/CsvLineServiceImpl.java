@@ -1,12 +1,16 @@
 package mu.integration.producer.service;
 
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mu.integration.producer.entity.CsvLine;
-import mu.integration.producer.repository.CsvLineRepository;
+import mu.integration.producer.entity.CsvLineInformation;
+import mu.integration.producer.repository.CsvLineInformationRepository;
 
 /**
  *
@@ -18,10 +22,39 @@ import mu.integration.producer.repository.CsvLineRepository;
 @Service
 public class CsvLineServiceImpl implements CsvLineService {
 
-    private final CsvLineRepository csvLineRepository;
+    private final CsvLineInformationRepository csvLineRepository;
+    private final ObjectMapper mapper;
 
     @Override
-    public void saveCsvLine(CsvLine csvLine) {
-        csvLineRepository.save(csvLine);
+    public CsvLineInformation saveCsvLine(Message<String> message) {
+        CsvLineInformation csvLineInformation = new CsvLineInformation();
+        csvLineInformation.setLine(message.getPayload());
+        csvLineInformation.setFileName((String) message.getHeaders().get("file_name"));
+
+        return csvLineRepository.save(csvLineInformation);
+    }
+
+    @Override
+    public CsvLineInformation updateCsvLine(Message<String> message) throws JsonProcessingException {
+
+        CsvLineInformation csvLineInformation = mapper.readValue(message.getPayload(), CsvLineInformation.class);
+
+        csvLineRepository.findById(csvLineInformation.getId()).ifPresentOrElse(
+                persistedCsvLineInformation -> {
+                    //TODO to confirm only description and value can be updated
+                    persistedCsvLineInformation.setStatus(csvLineInformation.getStatus());
+                    csvLineRepository.save(persistedCsvLineInformation);
+                },
+                () -> {
+                    //TODO throw new exception
+                }
+
+        );
+        return csvLineInformation;
+    }
+
+    @Override
+    public CsvLineInformation findById(Long id) {
+        return csvLineRepository.findById(id.toString()).get();
     }
 }

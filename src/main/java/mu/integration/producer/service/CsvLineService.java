@@ -1,14 +1,22 @@
 package mu.integration.producer.service;
 
-import mu.integration.producer.entity.CsvLine;
+import org.springframework.messaging.Message;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import mu.integration.producer.entity.CsvLineInformation;
 
 /**
- * Exposes service operations related to csv line
+ * Exposes service operations related to csv line {@link ObjectMapper the exception error}
  *
  * @author Priteela
  */
 public interface CsvLineService {
 
-    void saveCsvLine(CsvLine csvLine);
+    CsvLineInformation saveCsvLine(Message<String> message);
 
+    CsvLineInformation updateCsvLine(Message<String> message) throws JsonProcessingException;
+
+    CsvLineInformation findById(Long id);
 }
