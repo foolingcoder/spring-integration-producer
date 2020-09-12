@@ -36,7 +36,7 @@ public class CsvLineServiceImpl implements CsvLineService {
     }
 
     @Override
-    public Message updateCsvLine(Message<String> message) throws JsonProcessingException {
+    public Message<CsvLineInformation> updateCsvLine(Message<String> message) throws JsonProcessingException {
 
         CsvLineInformation csvLineInformation = mapper.readValue(message.getPayload(), CsvLineInformation.class);
 
@@ -51,9 +51,9 @@ public class CsvLineServiceImpl implements CsvLineService {
                 }
 
         );
-        Message message2 = MessageBuilder.withPayload(csvLineInformation)
+
+        return MessageBuilder.withPayload(csvLineInformation)
                 .copyHeaders(message.getHeaders()).build();
-        return message2;
     }
 
     @Override

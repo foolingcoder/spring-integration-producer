@@ -14,6 +14,12 @@ import org.springframework.integration.file.support.FileExistsMode;
 
 import mu.integration.producer.entity.CsvLineInformation;
 
+/***
+ * Contains the integration flow for reading the response from the message broker,updates the csv line
+ *  and write to a csv file
+ *
+ * @author Priteela
+ */
 @Configuration
 public class ResponseConfig {
     public static final String OUTPUT_DIR = "D:\\test\\output";

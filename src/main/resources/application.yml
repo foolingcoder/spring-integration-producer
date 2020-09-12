@@ -11,9 +11,9 @@ spring:
     stream:
       bindings:
         output:
-          destination: orders-out
+          destination: lines-out
         input:
-          destination: orders-in
+          destination: lines-in
       rabbit:
         bindings:
           input:

@@ -14,6 +14,13 @@ import org.springframework.integration.dsl.Pollers;
 import org.springframework.integration.file.FileReadingMessageSource;
 import org.springframework.integration.file.transformer.FileToStringTransformer;
 
+
+/***
+ * Contains the integration flow for reading csv file , splitting it line by line
+ *  and sends each line to the message broker
+ *
+ * @author Priteela
+ */
 @Configuration
 public class ProducerConfig {
     public static final String INPUT_DIR = "D:\\test";
@@ -27,7 +34,7 @@ public class ProducerConfig {
     private ConnectionFactory connectionFactory;
 
     @Bean
-    public MessageSource<File> CsvFileSource() {
+    public MessageSource<File> stringSource() {
         FileReadingMessageSource messageSource = new FileReadingMessageSource();
         messageSource.setDirectory(new File(INPUT_DIR));
         return messageSource;
@@ -35,12 +42,7 @@ public class ProducerConfig {
 
     @Bean
     public GenericSelector<File> onlyCsv() {
-        return new GenericSelector<File>() {
-            @Override
-            public boolean accept(File source) {
-                return source.getName().endsWith(FILE_EXTENSION);
-            }
-        };
+        return source -> source.getName().endsWith(FILE_EXTENSION);
     }
 
     @Bean
@@ -54,7 +56,7 @@ public class ProducerConfig {
     public IntegrationFlow produce() {
 
         return IntegrationFlows
-                .from(CsvFileSource(), configurer -> configurer.poller(Pollers.fixedDelay(10000)))
+                .from(stringSource(), configurer -> configurer.poller(Pollers.fixedDelay(10000)))
 
                 //read only csv file
                 .filter(onlyCsv())
