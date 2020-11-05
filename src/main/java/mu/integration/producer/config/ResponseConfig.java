@@ -42,13 +42,20 @@ public class ResponseConfig {
                         .map(CsvLineInformation::toString)
                         .collect(Collectors.joining(System.lineSeparator())))
 
-//                .handle(m -> System.out.println(m.getPayload()))
+                .split()
 
-                //write to csv file
-                .channel("csvFileWriter.input")
+                .routeToRecipients(route -> route
+                        .<String>recipient("csvFileWriter.input", this::hasErrors))
 
                 .get();
 
+    }
+
+    private boolean hasErrors(String message) {
+        if (message == null || message.isBlank()) {
+            return false;
+        }
+        return true;
     }
 
 

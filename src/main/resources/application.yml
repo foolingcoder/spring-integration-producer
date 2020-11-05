@@ -1,26 +1,27 @@
+server:
+  port: 8083
+
 spring:
   data:
     mongodb:
       host: localhost
       port: 27018
-      database: system-config
-      username: system-config
-      password: config_123
+      database: integration
+      username: integration
+      password: integration_123
 
   cloud:
     stream:
       bindings:
         output:
-          destination: lines-out
+          destination: mns-trs-transport-out
+          producer:
+            required-groups: outConsumer
         input:
-          destination: lines-in
-      rabbit:
-        bindings:
-          input:
-            consumer:
-              exchangeType: direct
-server:
-  port: 8184
-  error:
-    include-message: always
+          destination: mns-trs-transport-in
+          group: inConsumer
 
+
+  rabbitmq:
+    username: rabbitAdminUser
+    password: rabbitAdminPwd

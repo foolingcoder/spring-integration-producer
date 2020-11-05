@@ -21,7 +21,7 @@ public class CsvLineInformationSender {
     private final Source source;
 
     public void send(Message<CsvLineInformation> message) {
-        log.debug("\n\n CsvLine sent: {}", message);
+        log.info("\n\n CsvLine sent: {}", message);
         this.source.output().send(message);
     }
 
